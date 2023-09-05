@@ -1,10 +1,32 @@
 import {Colors} from '../const';
+import {monthNames} from '../mocks/task';
+import {createElementTemplate} from '../utils/utils';
 
+const dayInMonth = (month, year) => {
+  return new Date(year, month, 0).getDate();
+}
+
+const dateTransition = (data) => {
+  const year = new Date().getFullYear(),
+        month = new Date().getMonth(),
+        dayInCurrentMonth = dayInMonth(month, year);
+  let [day, mon] = data.split(' ');
+
+  if(day > dayInCurrentMonth){
+    day = day-dayInCurrentMonth;
+    mon = monthNames[month+1] || monthNames[0];
+  }else if(day < 1){
+    day = dayInCurrentMonth - Math.abs(day);
+    mon = monthNames[month-1] || monthNames[0];
+  }
+  return[day, mon];
+};
 
 const createCardEdit = (card) =>{
-  const {description, dueDate, repeatingDays, tags, color} = card;
-  const convertingTagsToArray = [...tags]
-  const [setDate, setTime] = dueDate
+  const {description, dueDate, repeatingDays, tags, color} = card,
+        convertingTagsToArray = [...tags],
+        [setDate, setTime] = dueDate,
+        [day, month] = dateTransition(setDate);
   return(`
       <form class="card__form" method="get">
       <div class="card__inner">
@@ -38,7 +60,7 @@ const createCardEdit = (card) =>{
                     type="text"
                     placeholder=""
                     name="date"
-                    value="${setDate} ${setTime}"
+                    value="${day} ${month} ${setTime}"
                   />
                 </label>
               </fieldset>
@@ -134,10 +156,33 @@ const createCardEdit = (card) =>{
   `)
 }
 
-export const createEditTemplateCard = (dataCard) =>{
+const createEditTemplateCard = (dataCard) =>{
   return(`
       <article class="card card--edit card--yellow card--repeat">
            ${createCardEdit(dataCard)}
       </article>
   `);
 };
+
+export default class CardEdit {
+  constructor(editCard){
+    this._element = null;
+    this._editCard = editCard; 
+  }
+
+  getTemplate(){
+    return createEditTemplateCard(this._editCard);
+  }
+
+  getElement(){
+    if(!this._element){
+      this._element = createElementTemplate(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement(){
+    this._element = null;
+  }
+}

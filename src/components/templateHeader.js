@@ -1,4 +1,5 @@
-export const createTemlateHeader = () => {
+import {createElementTemplate} from '../utils/utils';
+const createTemlateHeader = () => {
     return (`        
     <section class="control__btn-wrap">
         <input
@@ -30,3 +31,24 @@ export const createTemlateHeader = () => {
   </section>`
   );
 };
+
+export default class SiteMenu {
+  constructor(){
+    this._element = null;
+  }
+
+  getTemplate(){
+    return createTemlateHeader();
+  }
+
+  getElement(){
+    if(!this._element){
+      this._element = createElementTemplate(this.getTemplate())
+    }
+    return this._element;
+  }
+
+  removeElement(){
+    this._element = null;
+  }
+}

@@ -1,82 +1,78 @@
 import './index.html';
 import './libs/normalize.css';
 import './style.css';
-import { TUSK_COUNT } from './const';
-import {createTemlateHeader} from './components/templateHeader';
-import {createTemplateFilter} from './components/templateFilter';
-import {createTemplateBoard} from './components/templateBoard';
-import {createTemplateCard} from './components/templateCard';
-import {createEditTemplateCard} from './components/templateEditCard';
-import {createTemplateButtonLoadMore} from './components/templateButtonLoadMore';
+import { TUSK_COUNT, SHOWING_TUSK_COUNT_AT_START } from './const';
+import SiteMenu from './components/templateHeader';
+import Filter from './components/templateFilter';
+import SortBoard from './components/templateBoard';
+import Card from './components/templateCard';
+import CardEdit from './components/templateEditCard';
+import BtnLoadMore from './components/templateButtonLoadMore';
 import {generateFilters} from './mocks/filter';
-import {generateTask, generateTasks} from './mocks/task';
-const dataFilter = generateFilters();
+import {generateTasks} from './mocks/task'; 
+import {render, RenderPosition, toggelData} from './utils/utils';
+
+const templateBoard = new SortBoard();
+const templateBtnLoadMore = new BtnLoadMore().getElement();
 
 const saiteMainElement = document.querySelector('.main'),
       saiteHeaderElement = saiteMainElement.querySelector('.main__control');
 
-const render = (container, place, template) =>{
-    container.insertAdjacentHTML(place, template);
-}
-
-render(saiteHeaderElement,`beforeEnd`,createTemlateHeader());
-render(saiteMainElement,`beforeEnd`, createTemplateFilter(dataFilter));
-render(saiteMainElement,`beforeEnd`,createTemplateBoard());
+render(saiteHeaderElement, RenderPosition.BEFOREEND, new SiteMenu().getElement());
+render(saiteMainElement, RenderPosition.BEFOREEND, new Filter(generateFilters()).getElement());
+render(saiteMainElement, RenderPosition.BEFOREEND, templateBoard.getElement());
 
 const boardElement = saiteMainElement.querySelector('.board');
-render(boardElement, `beforeEnd`, createTemplateButtonLoadMore());
+
+render(boardElement, RenderPosition.BEFOREEND, templateBtnLoadMore);
 
 const taskListTemplate = saiteMainElement.querySelector('.board__tasks');
 const LoadMoreBTN = document.querySelector('.load-more');
 
-render(taskListTemplate, `beforeEnd`, createEditTemplateCard(generateTask()));
+const renderTask = (task) =>{
+  const taskComponent = new Card(task);
+  const taskEditComponent = new CardEdit(task);
 
-const toggelData = document.querySelector('.card__date-deadline-toggle'),
-      toggelDataSpan = document.querySelector('.card__date-status'),
-      fildsetData = document.querySelector('.card__date-deadline'),
-      toggleRepeat = document.querySelector('.card__repeat-toggle'),
-      toggelRepeatSpan = document.querySelector('.card__repeat-status'),
-      fildsetRepeate = document.querySelector('.card__repeat-days');
-      
-const toggelDataFn = (btn, childElement, changElement) => {
-  btn.addEventListener('click', (e)=>{
-    const target = e.target;
-    if(target == btn && target.firstElementChild.innerHTML === 'yes') {
-      target.firstElementChild.innerHTML = 'no';
-      changElement.setAttribute("disabled", "disabled");
-    }else if(target == childElement && target.innerHTML === 'yes'){
-      target.innerHTML = 'no';
-      changElement.setAttribute("disabled", "disabled");
-    }else if(target == childElement && target.innerHTML === 'no'){
-      target.innerHTML = 'yes';
-      changElement.removeAttribute("disabled", "disabled");
-    }else{
-      target.firstElementChild.innerHTML = 'yes';
-      changElement.removeAttribute("disabled", "disabled");
-    }
+  const editBtn = taskComponent.getElement().querySelector(`.card__btn--edit`);
+  editBtn.addEventListener(`click`, ()=>{
+    taskListTemplate.replaceChild(taskEditComponent.getElement(), taskComponent.getElement());
+    const dataBtn = taskEditComponent.getElement().querySelector(`.card__date-deadline-toggle`),
+          toggelDataSpan = taskEditComponent.getElement().querySelector(`.card__date-status`),
+          fildsetData = taskEditComponent.getElement().querySelector(`.card__date-deadline`),
+          repeatBtn = taskEditComponent.getElement().querySelector(`.card__repeat-toggle`),
+          toggelRepeatSpan = taskEditComponent.getElement().querySelector(`.card__repeat-status`),
+          fildsetRepeate = taskEditComponent.getElement().querySelector(`.card__repeat-days`);
+    
+          toggelData(dataBtn, toggelDataSpan, fildsetData);
+          toggelData(repeatBtn, toggelRepeatSpan, fildsetRepeate);
   });
-};
 
-toggelDataFn(toggelData, toggelDataSpan, fildsetData);
-toggelDataFn(toggleRepeat, toggelRepeatSpan, fildsetRepeate);
+  const editForm = taskEditComponent.getElement().querySelector(`form`);
+  editForm.addEventListener(`submit`, ()=>{
+    taskListTemplate.replaceChild(taskComponent.getElement(), taskEditComponent.getElement());
+  });
 
-const tasksPerPage = 8;
-let currentPage = 1
+  render(taskListTemplate, RenderPosition.BEFOREEND, taskComponent.getElement());
+}
 
-const showLimitedTusk = (page) =>{
-  const startIndex = (page - 1) * tasksPerPage;
-  const endIndex = startIndex + tasksPerPage;
-  const getLimitedTasks = generateTasks(TUSK_COUNT).slice(startIndex, endIndex);
-  getLimitedTasks.fill(``).forEach(
-    ()=> render(taskListTemplate, `beforeEnd`, createTemplateCard(generateTask()))
+const showingTuskCount = SHOWING_TUSK_COUNT_AT_START;
+let currentElement = 1
+const showLimitedTusk = (current) =>{
+  const startIndex = (current - 1) * showingTuskCount;
+  const endIndex = startIndex + showingTuskCount;
+  generateTasks(TUSK_COUNT).slice(startIndex, endIndex).forEach(
+    (task)=>{
+      renderTask(task);
+    }
   );
 } 
-showLimitedTusk(currentPage);
+showLimitedTusk(currentElement);
 
 LoadMoreBTN.addEventListener('click', ()=>{
-  currentPage++;
-  const remainingTasks = generateTasks(TUSK_COUNT).length - (currentPage - 1) * tasksPerPage;
+  currentElement++;
+  const remainingTasks = generateTasks(TUSK_COUNT).length - (currentElement - 1) * showingTuskCount;
   console.log(remainingTasks);
-  remainingTasks > 0 ? showLimitedTusk(currentPage) : LoadMoreBTN.style = 'display:none';
+  remainingTasks > 0 ? showLimitedTusk(currentElement) : LoadMoreBTN.remove();
 });
+
 

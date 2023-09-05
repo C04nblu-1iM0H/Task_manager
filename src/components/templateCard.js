@@ -1,4 +1,5 @@
-import {monthNames} from '../mocks/task'
+import {monthNames} from '../mocks/task';
+import {createElementTemplate} from '../utils/utils';
 
 const dayInMonth = (month, year) => {
     return new Date(year, month, 0).getDate();
@@ -9,9 +10,13 @@ const dateTransition = (data) => {
           month = new Date().getMonth(),
           dayInCurrentMonth = dayInMonth(month, year);
     let [day, mon] = data.split(' ');
+  
     if(day > dayInCurrentMonth){
-        day = day-dayInCurrentMonth;
-        mon = monthNames[month+1] || monthNames[0];
+      day = day-dayInCurrentMonth;
+      mon = monthNames[month+1] || monthNames[0];
+    }else if(day < 1){
+      day = dayInCurrentMonth - Math.abs(day);
+      mon = monthNames[month-1] || monthNames[0];
     }
     return[day, mon];
 };
@@ -81,9 +86,31 @@ const createItemCard = (data) =>{
     `);
 };
 
-export const createTemplateCard = (data) =>{
+const createTemplateCard = (data) =>{
     return(`
         ${createItemCard(data)}
-
     `);
 };
+
+export default class Card {
+    constructor(card){
+        this._element = null;
+        this._card = card;
+    }
+
+    getTemplate(){
+        return createTemplateCard(this._card);
+    }
+
+    getElement(){
+        if(!this._element){
+            this._element = createElementTemplate(this.getTemplate());
+        }
+
+        return this._element;
+    }
+
+    removeElement(){
+        this._element = null;
+    }
+}
