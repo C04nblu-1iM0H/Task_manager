@@ -1,4 +1,5 @@
-import {createElementTemplate} from '../utils/utils';
+import AbstractComponent from "./AbstractComponent";
+
 const createTemlateHeader = () => {
     return (`        
     <section class="control__btn-wrap">
@@ -32,23 +33,12 @@ const createTemlateHeader = () => {
   );
 };
 
-export default class SiteMenu {
+export default class SiteMenu extends AbstractComponent{
   constructor(){
-    this._element = null;
+    super();
   }
 
   getTemplate(){
     return createTemlateHeader();
-  }
-
-  getElement(){
-    if(!this._element){
-      this._element = createElementTemplate(this.getTemplate())
-    }
-    return this._element;
-  }
-
-  removeElement(){
-    this._element = null;
   }
 }

@@ -1,24 +1,4 @@
-export const RenderPosition = {
-    AFTERBEGIN:`afterBegin`,
-    BEFOREEND: `beforeEnd`
-}
 
-export const createElementTemplate = (elem) =>{
-    const newElement = document.createElement('div');
-    newElement.innerHTML = elem;
-    
-    return newElement;
-};
-export const render = (container, place, val) =>{
-    switch(place){
-        case RenderPosition.AFTERBEGIN:
-             container.prepend(val);
-             break;
-        case RenderPosition.BEFOREEND:
-             container.append(val);
-            break;
-    }
-}
 
 
 export const toggelData = (btn, childElement, changElement) => {

@@ -1,35 +1,14 @@
-import {monthNames} from '../mocks/task';
-import {createElementTemplate} from '../utils/utils';
+import AbstractComponent from "./AbstractComponent";
+import moment from 'moment';
 
-const dayInMonth = (month, year) => {
-    return new Date(year, month, 0).getDate();
-}
 
-const dateTransition = (data) => {
-    const year = new Date().getFullYear(),
-          month = new Date().getMonth(),
-          dayInCurrentMonth = dayInMonth(month, year);
-    let [day, mon] = data.split(' ');
-  
-    if(day > dayInCurrentMonth){
-      day = day-dayInCurrentMonth;
-      mon = monthNames[month+1] || monthNames[0];
-    }else if(day < 1){
-      day = dayInCurrentMonth - Math.abs(day);
-      mon = monthNames[month-1] || monthNames[0];
-    }
-    return[day, mon];
-};
-
-const createItemCard = (data) =>{
-    const {description, dueDate, tags, isArchive, isFavorite, color} = data,
-          [setDate, setTime] = dueDate,
-           convertingTagsToArray = [...tags],
-          [dayColor] = setDate.split(' '),
-          currentDate =  new Date().getDate(),
-          [day, month] = dateTransition(setDate);
+const createItemTask = (task) =>{   
+    const {description, tags, dueDate, dueTime, isArchive, isFavorite, color} = task,
+            currentDate = moment().format("MMMM DD"), //получение текущей даты для сравнения.
+           convertingTagsToArray = [...tags];
+           
     return(`
-        <article class="card card--${color} ${currentDate < dayColor ? `${Math.random() > 0.5 ? `card--repeat` : ``}`:`card--deadline`}">
+        <article class="card card--${color} ${ dueDate > currentDate? `${Math.random() > 0.5 ? `card--repeat` : ``}`:`card--deadline`}">
             <div class="card__form">
                 <div class="card__inner">
                     <div class="card__control">
@@ -59,8 +38,8 @@ const createItemCard = (data) =>{
                     <div class="card__dates">
                         <div class="card__date-deadline">
                         <p class="card__input-deadline-wrap">
-                            <span class="card__date">${day} ${month}</span>
-                            <span class="card__time">${setTime}</span>
+                            <span class="card__date">${dueDate}</span>
+                            <span class="card__time">${dueTime}</span>
                         </p>
                         </div>
                     </div>
@@ -86,31 +65,24 @@ const createItemCard = (data) =>{
     `);
 };
 
-const createTemplateCard = (data) =>{
+const createTemplateTask = (task) =>{
     return(`
-        ${createItemCard(data)}
+        ${createItemTask(task)}
     `);
 };
 
-export default class Card {
-    constructor(card){
-        this._element = null;
-        this._card = card;
+export default class Task extends AbstractComponent {
+    constructor(task){
+        super();
+        this._task = task;
     }
-
+    
     getTemplate(){
-        return createTemplateCard(this._card);
+        return createTemplateTask(this._task);
     }
 
-    getElement(){
-        if(!this._element){
-            this._element = createElementTemplate(this.getTemplate());
-        }
-
-        return this._element;
+    setEditTamplate(handler){
+        this.getElement().querySelector('.card__btn--edit').addEventListener('click', handler);
     }
 
-    removeElement(){
-        this._element = null;
-    }
 }

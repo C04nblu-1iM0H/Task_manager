@@ -1,4 +1,5 @@
 import { Colors } from "../const";
+import moment from 'moment';
 
 const DescriptionItems = [
     `Изучить теорию`,
@@ -29,6 +30,7 @@ export const monthNames = ["January", "February", "March", "April", "May", "June
 ];
 
 
+
 const getRandomIntegerNumber = (min, max) =>{
     return min + Math.floor(max * Math.random());
 }
@@ -43,26 +45,47 @@ const generatorTags = (tags) =>{
     return tags.filter(() => Math.random() > 0.5).slice(0,3);
 }
 
-const getTimeWithAMPM = (time) =>{
-    const [hours, minutes] = time.split(':');
-    return hours - 12 > 0 ? `${hours-12}:${minutes} PM` : `${hours}:${minutes} AM`;
+
+export const randomTimeTransition = () => {
+    const currentMoment = moment();
+    // Генерация случайного числа от -180 до 180 (количество минут для добавления или вычитания)
+    const randomMinutes = Math.floor(Math.random() * 361) - 180;
+    // Добавление случайного количества минут
+    currentMoment.add(randomMinutes, 'minutes');
+    // Проверка, если минуты вышли за пределы 24 часов
+    if (currentMoment.minutes() < 0) {
+        // Вычитание 60 минут (1 час) и уменьшение часов
+        currentMoment.subtract(60, 'minutes').subtract(1, 'hours');
+    } else if (currentMoment.minutes() >= 60) {
+        // Вычитание 60 минут (1 час) и увеличение часов
+        currentMoment.subtract(60, 'minutes').add(1, 'hours');
+    }
+    return currentMoment.format('HH:mm');
 }
 
-const getDateThisCards = () => {
-    const date = new Date();
-    const setDate = `${Math.random() > 0.5 ? date.getDate() + Math.floor(Math.random() * 12) : date.getDate() - Math.floor(Math.random() * 12)} ${monthNames[date.getMonth()]}`;
-    const setTime = `${date.getHours()}:${date.getMinutes()}`;
-    const getTimeAMPM = getTimeWithAMPM(setTime)
-    return [
-        setDate,
-        getTimeAMPM
-    ];
-};
+export const randomDateTransition = () => {
+    const currentMoment = moment();  
+    // Генерация случайного числа от -15 до 15 (количество дней для добавления или вычитания)
+    const randomDays = Math.floor(Math.random() * 31) - 15;
+    // Добавление случайного числа дней
+    currentMoment.add(randomDays, 'days');
+    // Проверка, если день вышел за пределы текущего месяца
+    if (currentMoment.date() > moment().daysInMonth()) {
+        // Увеличение месяца
+        currentMoment.add(1, 'month');
+        // Проверка, если месяц стал больше 12, обновление до 0
+        if (currentMoment.month() > 11) {
+            currentMoment.month(0);
+        }
+    }
+    return currentMoment.format("MMMM DD")
+}
 
 const generateTask = () =>{
     return{
         description : getRandomArrayItem(DescriptionItems),
-        dueDate: getDateThisCards(),
+        dueDate: randomDateTransition(),
+        dueTime:randomTimeTransition(),
         repeatingDays:DefaultRepeatingDays,
         tags: new Set(generatorTags(Tags)),
         isFavorite : Math.random() > 0.5,

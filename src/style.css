@@ -367,6 +367,7 @@ body {
 .card__date-deadline:disabled {
   display: none;
 }
+
 .card--deadline .card__date,
 .card--deadline .card__time {
   color: #f11a1a;
