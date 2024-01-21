@@ -1,7 +1,7 @@
 import moment from 'moment';
 
 import {render, removeBtn, RenderPosition, replace} from "../utils/render";
-import {SHOWING_TUSK_COUNT_AT_START, TASK_BUTTON  } from '../const';
+import {TASK_BUTTON  } from '../const';
 import NoTasks from "../components/no-tasks";
 import Task from "../components/task";
 import TaskEdit from "../components/task-edit";
@@ -121,7 +121,6 @@ export default class BoardController {
         render(siteBoardElement, this._sort.getElement(), RenderPosition.AFTERBEGIN);
 
         const showLimitedTusk = (tasksDefault) =>{
-            console.log('Список задач - ', tasksDefault);
             const startIndex = (this._currentElement - 1) * TASK_BUTTON;
             const endIndex = startIndex + TASK_BUTTON;
             renderTasks(siteBoardTuskElement, tasksDefault.slice(startIndex, endIndex));
@@ -134,7 +133,6 @@ export default class BoardController {
             const remainingTasks = tasks.length - ( this._currentElement - 1) * TASK_BUTTON;
             const taskList = this._transferSortType !== SortType.DEFAULT ? this._sortedTask : tasks;
             console.log(taskList);
-            console.log('Не показанные задачи на экране - ',remainingTasks);
 
             remainingTasks > 0 ? showLimitedTusk(taskList) :  removeBtn(this._btnComponent);
         }
@@ -154,8 +152,6 @@ export default class BoardController {
                     this._sortedTask  = [...tasks];
                     break;
             }
-
-            console.log('Отсортированные задачи - ', this._sortedTask );
             siteBoardTuskElement.innerHTML = ``;
             showLimitedTusk(this._sortedTask );
             render(siteBoardElement, this._btnComponent.getElement(), RenderPosition.BEFOREEND);
