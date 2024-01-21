@@ -18,3 +18,4 @@ render(siteMenu, new Filter(filters).getElement(), RenderPosition.BEFOREEND);//Ñ
 let tasks = generateTasks(TUSK_COUNT);
 let boardController = new BoardController();
 boardController.render(tasks); 
+

@@ -132,7 +132,6 @@ export default class BoardController {
             this._currentElement++;
             const remainingTasks = tasks.length - ( this._currentElement - 1) * TASK_BUTTON;
             const taskList = this._transferSortType !== SortType.DEFAULT ? this._sortedTask : tasks;
-            console.log(taskList);
 
             remainingTasks > 0 ? showLimitedTusk(taskList) :  removeBtn(this._btnComponent);
         }
