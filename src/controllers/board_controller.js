@@ -1,9 +1,11 @@
+import moment from 'moment';
+
 import {render, removeBtn, RenderPosition, replace} from "../utils/render";
-import {SHOWING_TUSK_COUNT_AT_START, ESCAPE_KEY, TASK_BUTTON, TUSK_COUNT  } from '../const';
+import {SHOWING_TUSK_COUNT_AT_START, TASK_BUTTON  } from '../const';
 import NoTasks from "../components/no-tasks";
 import Task from "../components/task";
 import TaskEdit from "../components/task-edit";
-import Sort from "../components/sort";
+import Sort, { SortType } from "../components/sort";
 import BtnLoadMore from "../components/ButtonLoadMore";
 import Board from "../components/board";
 
@@ -103,13 +105,14 @@ export default class BoardController {
         this._noTasks = new NoTasks();
         this._sort = new Sort();
         this._btnComponent = new BtnLoadMore();
+
+        this._currentElement = 1;
+        this._sortedTask = [];
+        this._transferSortType = SortType.DEFAULT;
     }
 
   
     render(tasks){
-        let showingTuskCount = SHOWING_TUSK_COUNT_AT_START;
-        let currentElement = 1;
-        
         const siteMainElement = document.querySelector(`.main`);
         const siteBoardElement = this._board.getElement().querySelector(`.board`);
         const siteBoardTuskElement = this._board.getElement().querySelector(`.board__tasks`);
@@ -117,22 +120,46 @@ export default class BoardController {
         render(siteMainElement, this._board.getElement(), RenderPosition.BEFOREEND);
         render(siteBoardElement, this._sort.getElement(), RenderPosition.AFTERBEGIN);
 
-        const showLimitedTusk = () =>{
-            const startIndex = ( currentElement - 1 <= 0 ) ? (currentElement - 1) * showingTuskCount : (currentElement - 1) * TASK_BUTTON;
-            const endIndex =  (startIndex === 0 ) ? startIndex + showingTuskCount : startIndex + TASK_BUTTON;
-            renderTasks(siteBoardTuskElement, tasks.slice(startIndex, endIndex));
+        const showLimitedTusk = (tasksDefault) =>{
+            console.log('Список задач - ', tasksDefault);
+            const startIndex = (this._currentElement - 1) * TASK_BUTTON;
+            const endIndex = startIndex + TASK_BUTTON;
+            renderTasks(siteBoardTuskElement, tasksDefault.slice(startIndex, endIndex));
         }
-        showLimitedTusk();
-
+        showLimitedTusk(tasks);
         render(siteBoardElement, this._btnComponent.getElement(), RenderPosition.BEFOREEND);
 
-        const addTusk = () =>{
-            currentElement++;
-            const remainingTasks = tasks.length - (currentElement - 1) * TASK_BUTTON;
-            console.log(remainingTasks);
-            remainingTasks > 0 ? showLimitedTusk(currentElement) :  removeBtn(this._btnComponent);
+        const addTask = () =>{
+            this._currentElement++;
+            const remainingTasks = tasks.length - ( this._currentElement - 1) * TASK_BUTTON;
+            const taskList = this._transferSortType !== SortType.DEFAULT ? this._sortedTask : tasks;
+            console.log(taskList);
+            console.log('Не показанные задачи на экране - ',remainingTasks);
+
+            remainingTasks > 0 ? showLimitedTusk(taskList) :  removeBtn(this._btnComponent);
         }
-        this._btnComponent.setClickHendler(addTusk);
+        this._btnComponent.setClickHandler(addTask);
+
+        this._sort.setSortTypeChangeHandler((sortType) => {
+            this._currentElement = 1;
+            this._transferSortType = sortType;
+            switch (sortType) {
+                case SortType.DATEUP:
+                    this._sortedTask  = [...tasks].sort((a,b) => moment(a.dueDate) - moment(b.dueDate));
+                    break;
+                case SortType.DATEDOWN:
+                    this._sortedTask  = [...tasks].sort((a,b) => moment(b.dueDate) - moment(a.dueDate));
+                    break;
+                case SortType.DEFAULT:
+                    this._sortedTask  = [...tasks];
+                    break;
+            }
+
+            console.log('Отсортированные задачи - ', this._sortedTask );
+            siteBoardTuskElement.innerHTML = ``;
+            showLimitedTusk(this._sortedTask );
+            render(siteBoardElement, this._btnComponent.getElement(), RenderPosition.BEFOREEND);
+        });
     }
 
 }

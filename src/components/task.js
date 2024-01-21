@@ -4,7 +4,8 @@ import moment from 'moment';
 
 const createItemTask = (task) =>{   
     const {description, tags, dueDate, dueTime, isArchive, isFavorite, color} = task,
-            currentDate = moment().format("MMMM DD"), //получение текущей даты для сравнения.
+           currentDate = moment().format("YYYY-MM-DD"), //получение текущей даты для сравнения.
+           date = moment(dueDate).format("MMMM DD"), // преобразование даты в формат (название месяца, день в формате от 01 до 31)
            convertingTagsToArray = [...tags];
            
     return(`
@@ -38,7 +39,7 @@ const createItemTask = (task) =>{
                     <div class="card__dates">
                         <div class="card__date-deadline">
                         <p class="card__input-deadline-wrap">
-                            <span class="card__date">${dueDate}</span>
+                            <span class="card__date">${date}</span>
                             <span class="card__time">${dueTime}</span>
                         </p>
                         </div>

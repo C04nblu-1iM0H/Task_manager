@@ -3,8 +3,8 @@ import moment from 'moment';
 
 const DescriptionItems = [
     `Изучить теорию`,
-    `Сделать домашку`,
-    `Пройти интенсив на соточку`,
+    // `Сделать домашку`,
+    // `Пройти интенсив на соточку`,
 ];
 
 const DefaultRepeatingDays = {
@@ -78,7 +78,7 @@ export const randomDateTransition = () => {
             currentMoment.month(0);
         }
     }
-    return currentMoment.format("MMMM DD")
+    return currentMoment.format("YYYY-MM-DD");
 }
 
 const generateTask = () =>{

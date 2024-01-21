@@ -27,11 +27,21 @@ export default class Sort extends AbstractComponent{
         return createTemplateSorting();
     }
 
-    // setSortTypeChangeHandler(handler){
-    //     this.getElement().addEventListener(`click`, (e)=>{
-    //         if(e.target.tagName == `A`){
-    //             return;
-    //         }
-    //     })
-    // }
+    setSortTypeChangeHandler(handler){
+        this.getElement().addEventListener(`click`, (e)=>{
+            e.preventDefault();
+
+            if(e.target.tagName !== `A`) {
+                return;
+            }
+
+            const sortType = e.target.dataset.sortType;
+            if(this._currentSortType === sortType){ 
+                return;
+            }
+
+            this._currentSortType = sortType;
+            handler(this._currentSortType);
+        });
+    }
 }
